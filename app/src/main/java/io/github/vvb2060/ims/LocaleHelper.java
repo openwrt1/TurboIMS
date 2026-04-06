@@ -11,6 +11,12 @@ public class LocaleHelper {
     private static final String PREF_NAME = "locale_config";
     private static final String KEY_LANGUAGE = "language";
 
+    /**
+     * 设置应用的语言
+     * 
+     * @param context      应用上下文
+     * @param languageCode 语言代码，如 "zh" 或 "en"
+     */
     public static void setLocale(Context context, String languageCode) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         prefs.edit().putString(KEY_LANGUAGE, languageCode).apply();
@@ -18,6 +24,13 @@ public class LocaleHelper {
         updateResources(context, languageCode);
     }
 
+    /**
+     * 获取当前语言设置
+     * 如果用户手动设置过，使用用户设置；否则根据系统语言自动判断
+     * 
+     * @param context 应用上下文
+     * @return 语言代码
+     */
     public static String getLanguage(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         // 如果用户已经手动设置过语言，使用用户设置
@@ -31,6 +44,12 @@ public class LocaleHelper {
         return systemLang.startsWith("zh") ? "zh" : "en";
     }
 
+    /**
+     * 更新应用的资源配置以应用新语言
+     * 
+     * @param context      应用上下文
+     * @param languageCode 语言代码
+     */
     public static void updateResources(Context context, String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
@@ -42,6 +61,12 @@ public class LocaleHelper {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 
+    /**
+     * 切换语言（中文和英文之间切换）
+     * 
+     * @param context 应用上下文
+     * @return 新的语言代码
+     */
     public static String toggleLanguage(Context context) {
         String currentLang = getLanguage(context);
         String newLang = currentLang.equals("zh") ? "en" : "zh";

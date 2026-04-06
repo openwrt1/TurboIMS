@@ -18,6 +18,10 @@ public class PrivilegedProcess extends Instrumentation {
 
     private static final String PREFS_NAME = "ims_config";
 
+    /**
+     * Instrumentation 创建时的入口方法
+     * 等待 Shizuku binder 准备好，然后应用 IMS 配置
+     */
     @Override
     public void onCreate(Bundle arguments) {
         Log.i("PrivilegedProcess", "onCreate called");
@@ -45,6 +49,11 @@ public class PrivilegedProcess extends Instrumentation {
         finish(0, new Bundle());
     }
 
+    /**
+     * 执行 IMS 配置覆盖的主要方法
+     * 获取 shell 权限，读取用户配置，然后为选定的 SIM 卡应用配置
+     * @throws Exception 如果配置失败
+     */
     private void overrideConfig() throws Exception {
         Log.i("PrivilegedProcess", "overrideConfig started");
         var binder = ServiceManager.getService(Context.ACTIVITY_SERVICE);
@@ -101,6 +110,11 @@ public class PrivilegedProcess extends Instrumentation {
         }
     }
 
+    /**
+     * 从 SharedPreferences 读取用户配置并构建 IMS 配置包
+     * @param context 应用上下文
+     * @return 配置包 PersistableBundle
+     */
     private static PersistableBundle getConfig(Context context) {
         // 读取用户配置
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

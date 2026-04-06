@@ -16,6 +16,13 @@ public class ImsConfigHelper {
     private static final String TAG = "ImsConfigHelper";
     private static final String PREFS_NAME = "ims_config";
 
+    /**
+     * 应用 IMS 配置到指定的订阅 ID
+     * 使用 Shizuku 获取 shell 权限，然后通过 CarrierConfigManager 覆盖配置
+     * @param context 应用上下文
+     * @param subId 订阅 ID
+     * @throws Exception 如果配置失败
+     */
     public static void applyConfig(Context context, int subId) throws Exception {
         Log.i(TAG, "Starting to apply IMS configuration for subId: " + subId);
 
@@ -63,6 +70,18 @@ public class ImsConfigHelper {
         }
     }
 
+    /**
+     * 根据用户设置构建 IMS 配置包
+     * 配置包括 VoLTE、VoWiFi、VT、VoNR、跨 SIM 通话、UT 服务和 5G NR 支持
+     * @param enableVoLTE 是否启用 VoLTE
+     * @param enableVoWiFi 是否启用 VoWiFi
+     * @param enableVT 是否启用视频通话
+     * @param enableVoNR 是否启用 VoNR
+     * @param enableCrossSIM 是否启用跨 SIM 通话
+     * @param enableUT 是否启用 UT 补充服务
+     * @param enable5GNR 是否启用 5G NR
+     * @return 配置包 PersistableBundle
+     */
     private static PersistableBundle buildConfigBundle(boolean enableVoLTE, boolean enableVoWiFi,
                                                         boolean enableVT, boolean enableVoNR,
                                                         boolean enableCrossSIM, boolean enableUT,

@@ -44,8 +44,30 @@ public class MainActivity extends Activity {
     private final Shizuku.OnBinderReceivedListener binderListener = this::updateShizukuStatus;
     private final Shizuku.OnBinderDeadListener binderDeadListener = this::updateShizukuStatus;
 
+    /**
+     * Activity 创建时的初始化方法
+     * 设置语言、初始化视图、加载偏好设置、更新 SIM 信息和 Shizuku 状态
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // 应用保存的语言设置
+        String language = LocaleHelper.getLanguage(this);
+        LocaleHelper.updateResources(this, language);
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        initViews();
+        loadPreferences();
+        updateSimInfo();
+        updateAndroidVersionInfo();
+        updateShizukuStatus();
+
+        Shizuku.addBinderReceivedListener(binderListener);
+        Shizuku.addBinderDeadListener(binderDeadListener);
+    }
         // 应用保存的语言设置
         String language = LocaleHelper.getLanguage(this);
         LocaleHelper.updateResources(this, language);
@@ -72,6 +94,10 @@ public class MainActivity extends Activity {
         Shizuku.removeBinderDeadListener(binderDeadListener);
     }
 
+    /**
+     * 初始化所有视图组件，包括文本视图、按钮和开关
+     * 设置功能标题和描述，并绑定点击事件监听器
+     */
     private void initViews() {
         tvAndroidVersion = findViewById(R.id.tv_android_version);
         tvShizukuStatus = findViewById(R.id.tv_shizuku_status);
@@ -217,6 +243,10 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * 更新 Shizuku 服务状态的显示
+     * 检查 binder 连接和权限状态，根据状态更新 UI 和按钮可用性
+     */
     private void updateShizukuStatus() {
         runOnUiThread(() -> {
             String statusText;
@@ -253,6 +283,11 @@ public class MainActivity extends Activity {
         Shizuku.requestPermission(0);
     }
 
+    /**
+     * 应用 IMS 配置的主要方法
+     * 保存用户偏好设置，检查 Shizuku 权限，然后启动特权进程来应用配置
+     * 配置完成后重新启动 Activity 并显示网络设置对话框
+     */
     private void applyConfiguration() {
         savePreferences();
 

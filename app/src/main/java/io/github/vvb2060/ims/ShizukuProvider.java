@@ -24,6 +24,11 @@ public class ShizukuProvider extends rikka.shizuku.ShizukuProvider {
         return super.onCreate();
     }
 
+    /**
+     * 启动特权进程来应用 IMS 配置
+     * 使用 Shizuku 的 Instrumentation API 来执行需要系统权限的操作
+     * @param context 应用上下文
+     */
     public static void startInstrument(Context context) {
         try {
             Log.i("ShizukuProvider", "Starting instrumentation...");
