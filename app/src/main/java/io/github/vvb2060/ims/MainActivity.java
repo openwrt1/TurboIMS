@@ -68,24 +68,6 @@ public class MainActivity extends Activity {
         Shizuku.addBinderReceivedListener(binderListener);
         Shizuku.addBinderDeadListener(binderDeadListener);
     }
-        // 应用保存的语言设置
-        String language = LocaleHelper.getLanguage(this);
-        LocaleHelper.updateResources(this, language);
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-
-        initViews();
-        loadPreferences();
-        updateSimInfo();
-        updateAndroidVersionInfo();
-        updateShizukuStatus();
-
-        Shizuku.addBinderReceivedListener(binderListener);
-        Shizuku.addBinderDeadListener(binderDeadListener);
-    }
 
     @Override
     protected void onDestroy() {
