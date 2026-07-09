@@ -1,5 +1,6 @@
 package io.github.vvb2060.ims;
 
+import android.annotation.SuppressLint;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -23,6 +24,7 @@ public class ImsConfigHelper {
      * @param subId 订阅 ID
      * @throws Exception 如果配置失败
      */
+    @SuppressLint({"MissingPermission", "NewApi"})
     public static void applyConfig(Context context, int subId) throws Exception {
         Log.i(TAG, "Starting to apply IMS configuration for subId: " + subId);
 
@@ -35,13 +37,30 @@ public class ImsConfigHelper {
             SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             boolean enableVoLTE = prefs.getBoolean("volte", true);
             boolean enableVoWiFi = prefs.getBoolean("vowifi", true);
-            boolean enableVT = prefs.getBoolean("vt", true);
+            boolean enableVT = prefs.getBoolean("vt", false);
             boolean enableVoNR = prefs.getBoolean("vonr", true);
             boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
             boolean enableUT = prefs.getBoolean("ut", true);
             boolean enable5GNR = prefs.getBoolean("5g_nr", true);
 
             var cm = context.getSystemService(CarrierConfigManager.class);
+
+            // 尝试通过 ImsMmTelManager 切换系统 VT 开关
+            try {
+                var imsManager = context.getSystemService(android.telephony.ims.ImsManager.class);
+                if (imsManager != null) {
+                    var mmTelManager = imsManager.getImsMmTelManager(subId);
+                    if (mmTelManager != null) {
+                        // 使用反射调用隐藏方法 setVtSettingEnabled
+                        var method = mmTelManager.getClass().getMethod("setVtSettingEnabled", boolean.class);
+                        method.invoke(mmTelManager, enableVT);
+                        Log.i(TAG, "Set VT setting to " + enableVT + " for SubId: " + subId + " via reflection");
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to set VT setting for SubId: " + subId, e);
+            }
+
             var values = buildConfigBundle(enableVoLTE, enableVoWiFi, enableVT, enableVoNR,
                                            enableCrossSIM, enableUT, enable5GNR);
 
@@ -82,6 +101,7 @@ public class ImsConfigHelper {
      * @param enable5GNR 是否启用 5G NR
      * @return 配置包 PersistableBundle
      */
+    @SuppressLint({"NewApi", "deprecation"})
     private static PersistableBundle buildConfigBundle(boolean enableVoLTE, boolean enableVoWiFi,
                                                         boolean enableVT, boolean enableVoNR,
                                                         boolean enableCrossSIM, boolean enableUT,
@@ -94,12 +114,11 @@ public class ImsConfigHelper {
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_HIDE_ENHANCED_4G_LTE_BOOL, false);
             bundle.putBoolean(CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, false);
+            bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         }
 
         // VT (视频通话) 配置
-        if (enableVT) {
-            bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        }
+        bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, enableVT);
 
         // UT 补充服务配置
         if (enableUT) {
@@ -118,6 +137,7 @@ public class ImsConfigHelper {
             bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, true);
+            bundle.putBoolean("carrier_wfc_provisioning_required_bool", false);
             // KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL
             bundle.putBoolean("show_wifi_calling_icon_in_status_bar_bool", true);
             // KEY_WFC_SPN_FORMAT_IDX_INT

@@ -193,7 +193,7 @@ public class MainActivity extends Activity {
     private void loadPreferences() {
         switchVoLTE.setChecked(prefs.getBoolean("volte", true));
         switchVoWiFi.setChecked(prefs.getBoolean("vowifi", true));
-        switchVT.setChecked(prefs.getBoolean("vt", true));
+        switchVT.setChecked(prefs.getBoolean("vt", false));
         switchVoNR.setChecked(prefs.getBoolean("vonr", true));
         switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", true));
         switchUT.setChecked(prefs.getBoolean("ut", true));

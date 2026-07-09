@@ -1,5 +1,6 @@
 package io.github.vvb2060.ims;
 
+import android.annotation.SuppressLint;
 import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.content.Context;
@@ -54,6 +55,7 @@ public class PrivilegedProcess extends Instrumentation {
      * 获取 shell 权限，读取用户配置，然后为选定的 SIM 卡应用配置
      * @throws Exception 如果配置失败
      */
+    @SuppressLint({"MissingPermission", "NewApi"})
     private void overrideConfig() throws Exception {
         Log.i("PrivilegedProcess", "overrideConfig started");
         var binder = ServiceManager.getService(Context.ACTIVITY_SERVICE);
@@ -68,7 +70,8 @@ public class PrivilegedProcess extends Instrumentation {
             // 读取用户选择的 SubId
             SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             int selectedSubId = prefs.getInt("selected_subid", 1);
-            Log.i("PrivilegedProcess", "Selected SubId: " + selectedSubId);
+            boolean enableVT = prefs.getBoolean("vt", false);
+            Log.i("PrivilegedProcess", "Selected SubId: " + selectedSubId + ", enableVT: " + enableVT);
 
             int[] subIds;
             if (selectedSubId == -1) {
@@ -83,6 +86,23 @@ public class PrivilegedProcess extends Instrumentation {
 
             for (var subId : subIds) {
                 Log.i("PrivilegedProcess", "Processing SubId: " + subId);
+
+                // 尝试通过 ImsMmTelManager 切换系统 VT 开关
+                try {
+                    var imsManager = getContext().getSystemService(android.telephony.ims.ImsManager.class);
+                    if (imsManager != null) {
+                        var mmTelManager = imsManager.getImsMmTelManager(subId);
+                        if (mmTelManager != null) {
+                            // 使用反射调用隐藏方法 setVtSettingEnabled
+                            var method = mmTelManager.getClass().getMethod("setVtSettingEnabled", boolean.class);
+                            method.invoke(mmTelManager, enableVT);
+                            Log.i("PrivilegedProcess", "Set VT setting to " + enableVT + " for SubId: " + subId + " via reflection");
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("PrivilegedProcess", "Failed to set VT setting for SubId: " + subId, e);
+                }
+
                 var bundle = cm.getConfigForSubId(subId, "vvb2060_config_version");
                 int currentVersion = bundle.getInt("vvb2060_config_version", 0);
                 Log.i("PrivilegedProcess", "Current version: " + currentVersion + ", BuildConfig: " + BuildConfig.VERSION_CODE);
@@ -115,12 +135,13 @@ public class PrivilegedProcess extends Instrumentation {
      * @param context 应用上下文
      * @return 配置包 PersistableBundle
      */
+    @SuppressLint({"NewApi", "deprecation"})
     private static PersistableBundle getConfig(Context context) {
         // 读取用户配置
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         boolean enableVoLTE = prefs.getBoolean("volte", true);
         boolean enableVoWiFi = prefs.getBoolean("vowifi", true);
-        boolean enableVT = prefs.getBoolean("vt", true);
+        boolean enableVT = prefs.getBoolean("vt", false);
         boolean enableVoNR = prefs.getBoolean("vonr", true);
         boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
         boolean enableUT = prefs.getBoolean("ut", true);
@@ -134,12 +155,11 @@ public class PrivilegedProcess extends Instrumentation {
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_HIDE_ENHANCED_4G_LTE_BOOL, false);
             bundle.putBoolean(CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, false);
+            bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL, false);
         }
 
         // VT (视频通话) 配置
-        if (enableVT) {
-            bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, true);
-        }
+        bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_VT_AVAILABLE_BOOL, enableVT);
 
         // UT 补充服务配置
         if (enableUT) {
@@ -158,6 +178,7 @@ public class PrivilegedProcess extends Instrumentation {
             bundle.putBoolean(CarrierConfigManager.KEY_CARRIER_WFC_SUPPORTS_WIFI_ONLY_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_WFC_MODE_BOOL, true);
             bundle.putBoolean(CarrierConfigManager.KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, true);
+            bundle.putBoolean("carrier_wfc_provisioning_required_bool", false);
             // KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL
             bundle.putBoolean("show_wifi_calling_icon_in_status_bar_bool", true);
             // KEY_WFC_SPN_FORMAT_IDX_INT
