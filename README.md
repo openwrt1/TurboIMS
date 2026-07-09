@@ -172,6 +172,22 @@ If you find this tool useful, please consider starring both this repository and 
 - [Shizuku](https://github.com/RikkaApps/Shizuku) by RikkaApps - Privilege escalation framework
 - [HiddenApiBypass](https://github.com/LSPosed/AndroidHiddenApiBypass) by LSPosed - Accessing hidden Android APIs
 
+## ⚠️ Important Note (Fixing "Immediate Disconnect/Call Drop" when calling China Mobile)
+
+If you experience immediate call drops (the call disconnects immediately during dialing or the first ring) when calling certain China Mobile numbers, please read the following explanation and instructions:
+
+### Cause of the Issue
+1. **Video Color Ringback Tone (VCRBT) Conflict**: China Mobile frequently enables a "Video Color Ringback Tone" service for many subscribers. When you dial these numbers, the network attempts to push a video stream during the early media stage (negotiation phase, SDP containing `m=video`).
+2. **Baseband Parser Bug**: Google Pixel devices (Pixel 6, 7, 8, 9 series) utilize Samsung's **Shannon modem (baseband)**. When the baseband's internal IMS protocol stack attempts to parse the non-standard video SDP headers pushed by China Mobile, it triggers an internal parsing exception/crash. This drops the call instantly with the error code `1610 (CODE_REJECT_UNSUPPORTED_SDP_HEADERS)` or `TERMINATED_UNSUPPORTED_SDP_HEADERS`.
+3. **Modem Firmware is Unmodifiable**: The cellular modem runs on a separate, closed-source real-time operating system (RTOS) which is completely isolated from Android. Third-party apps or custom ROMs cannot patch this firmware.
+
+### Solution
+To bypass this modem parser bug, we implement a system-level force-disable of Video Telephony (VT) in this app:
+1. **Disable VT in App**: Keep the **"Video Telephony (VT)"** switch set to **Disabled** (we have set this as the default), then click **Apply Configuration**.
+2. **System-wide Toggle**: The app will use Shizuku privileges to reflectively call the hidden system API `ImsMmTelManager.setVtSettingEnabled(false)` to force-disable the global video calling switch in Android.
+3. **Bypass Logic**: When disabled, your device registers to IMS with no video capabilities. The China Mobile network, recognizing you cannot receive video, will **automatically downgrade the color ringback to a standard audio-only tone**. This prevents the network from sending `m=video` SDP packets, completely avoiding the modem parser bug and allowing calls to connect successfully.
+4. **Carrier Entitlement (Alternative)**: If the call still drops, it means the network is still forcing the video stream. You should contact your carrier's customer service (e.g., dial **10000** for China Telecom) and request them to **"Deactivate Video Telephony (VT) service on my account"** (while keeping VoLTE voice active).
+
 ## 📄 License
 
 ```
