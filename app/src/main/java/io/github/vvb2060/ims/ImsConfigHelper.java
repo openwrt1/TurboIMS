@@ -38,7 +38,7 @@ public class ImsConfigHelper {
             boolean enableVoLTE = prefs.getBoolean("volte", true);
             boolean enableVoWiFi = prefs.getBoolean("vowifi", true);
             boolean enableVT = prefs.getBoolean("vt", false);
-            boolean enableVoNR = prefs.getBoolean("vonr", true);
+            boolean enableVoNR = prefs.getBoolean("vonr", false);
             boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
             boolean enableUT = prefs.getBoolean("ut", true);
             boolean enable5GNR = prefs.getBoolean("5g_nr", false);

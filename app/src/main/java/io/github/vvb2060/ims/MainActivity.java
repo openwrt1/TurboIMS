@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
     private Button btnApply;
 
     private SharedPreferences prefs;
-    private int selectedSubId = 1; // 默认SIM 1, -1表示全部应用
+    private int selectedSubId = -1; // 默认全部应用
 
     private final Shizuku.OnBinderReceivedListener binderListener = this::updateShizukuStatus;
     private final Shizuku.OnBinderDeadListener binderDeadListener = this::updateShizukuStatus;
@@ -194,7 +194,7 @@ public class MainActivity extends Activity {
         switchVoLTE.setChecked(prefs.getBoolean("volte", true));
         switchVoWiFi.setChecked(prefs.getBoolean("vowifi", true));
         switchVT.setChecked(prefs.getBoolean("vt", false));
-        switchVoNR.setChecked(prefs.getBoolean("vonr", true));
+        switchVoNR.setChecked(prefs.getBoolean("vonr", false));
         switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", true));
         switchUT.setChecked(prefs.getBoolean("ut", true));
         switch5GNR.setChecked(prefs.getBoolean("5g_nr", false));

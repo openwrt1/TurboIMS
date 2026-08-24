@@ -69,7 +69,7 @@ public class PrivilegedProcess extends Instrumentation {
 
             // 读取用户选择的 SubId
             SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            int selectedSubId = prefs.getInt("selected_subid", 1);
+            int selectedSubId = prefs.getInt("selected_subid", -1);
             boolean enableVT = prefs.getBoolean("vt", false);
             Log.i("PrivilegedProcess", "Selected SubId: " + selectedSubId + ", enableVT: " + enableVT);
 
@@ -142,7 +142,7 @@ public class PrivilegedProcess extends Instrumentation {
         boolean enableVoLTE = prefs.getBoolean("volte", true);
         boolean enableVoWiFi = prefs.getBoolean("vowifi", true);
         boolean enableVT = prefs.getBoolean("vt", false);
-        boolean enableVoNR = prefs.getBoolean("vonr", true);
+        boolean enableVoNR = prefs.getBoolean("vonr", false);
         boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
         boolean enableUT = prefs.getBoolean("ut", true);
         boolean enable5GNR = prefs.getBoolean("5g_nr", false);
