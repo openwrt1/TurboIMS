@@ -30,7 +30,7 @@
     <string name="ut">UT Supplementary Services</string>
     <string name="ut_desc">Call forwarding, call waiting, etc.</string>
     <string name="_5g_nr">5G NR (NSA/SA)</string>
-    <string name="_5g_nr_desc">Enable 5G network (Non-standalone/Standalone)</string>
+    <string name="_5g_nr_desc">Enable 5G network (NSA/SA). Warning: Pixels with Samsung modems (e.g. Pixel 8 series) may experience severe battery drain and heating on 5G in China; recommended to keep disabled.</string>
 
     <!-- Button -->
     <string name="apply_config">Apply Configuration</string>

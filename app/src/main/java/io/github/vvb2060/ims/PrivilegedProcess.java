@@ -145,7 +145,7 @@ public class PrivilegedProcess extends Instrumentation {
         boolean enableVoNR = prefs.getBoolean("vonr", true);
         boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
         boolean enableUT = prefs.getBoolean("ut", true);
-        boolean enable5GNR = prefs.getBoolean("5g_nr", true);
+        boolean enable5GNR = prefs.getBoolean("5g_nr", false);
 
         var bundle = new PersistableBundle();
 

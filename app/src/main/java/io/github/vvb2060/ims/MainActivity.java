@@ -197,7 +197,7 @@ public class MainActivity extends Activity {
         switchVoNR.setChecked(prefs.getBoolean("vonr", true));
         switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", true));
         switchUT.setChecked(prefs.getBoolean("ut", true));
-        switch5GNR.setChecked(prefs.getBoolean("5g_nr", true));
+        switch5GNR.setChecked(prefs.getBoolean("5g_nr", false));
     }
 
     private void savePreferences() {
