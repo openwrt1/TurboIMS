@@ -213,6 +213,15 @@
             <!-- 5G NR -->
             <include layout="@layout/feature_item"
                 android:id="@+id/item_5g_nr" />
+
+            <View style="@style/Divider"
+                android:id="@+id/divider_esim_wfc"
+                android:visibility="gone" />
+
+            <!-- eSIM WFC -->
+            <include layout="@layout/feature_item"
+                android:id="@+id/item_esim_wfc"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Apply Button -->

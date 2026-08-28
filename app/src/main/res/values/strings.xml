@@ -31,6 +31,8 @@
     <string name="ut_desc">Call forwarding, call waiting, etc.</string>
     <string name="_5g_nr">5G NR (NSA/SA)</string>
     <string name="_5g_nr_desc">Enable 5G network (NSA/SA). Warning: Pixels with Samsung modems (e.g. Pixel 8 series) may experience severe battery drain and heating on 5G in China; recommended to keep disabled.</string>
+    <string name="esim_wfc">eSIM Wi-Fi Calling</string>
+    <string name="esim_wfc_desc">Force Wi-Fi Calling preferred for eSIM/Foreign SIM</string>
 
     <!-- Button -->
     <string name="apply_config">Apply Configuration</string>
@@ -63,6 +65,6 @@
 
     <!-- Network Settings -->
     <string name="go_to_network_settings">Go to Network Settings</string>
-    <string name="config_success_message">Configuration applied successfully! Would you like to go to network settings?</string>
+    <string name="config_success_message">Configuration applied successfully! (If a foreign/eSIM is detected, Wi-Fi Calling preferred has been automatically forced). Would you like to go to network settings?</string>
     <string name="later">Later</string>
 </resources>

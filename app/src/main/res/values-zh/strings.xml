@@ -31,6 +31,8 @@
     <string name="ut_desc">呼叫转移、呼叫等待等</string>
     <string name="_5g_nr">5G NR（NSA/SA）</string>
     <string name="_5g_nr_desc">启用 5G 网络（非独立/独立组网）。警告：搭载三星基带的机型（如 Pixel 8 系列）在中国使用 5G 可能会导致严重发热与耗电，建议保持关闭。</string>
+    <string name="esim_wfc">eSIM Wi-Fi Calling</string>
+    <string name="esim_wfc_desc">检测到 eSIM/外卡时，强制优先使用 Wi-Fi 通话</string>
 
     <!-- Button -->
     <string name="apply_config">应用配置</string>
@@ -63,6 +65,6 @@
 
     <!-- Network Settings -->
     <string name="go_to_network_settings">前往网络设置</string>
-    <string name="config_success_message">配置已成功应用！是否前往网络设置？</string>
+    <string name="config_success_message">配置已成功应用！（若检测到 eSIM 或外卡，已自动强制优先使用 Wi-Fi Calling）。是否前往网络设置？</string>
     <string name="later">稍后</string>
 </resources>

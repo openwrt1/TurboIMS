@@ -71,6 +71,7 @@ public class PrivilegedProcess extends Instrumentation {
             SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             int selectedSubId = prefs.getInt("selected_subid", -1);
             boolean enableVT = prefs.getBoolean("vt", false);
+            boolean enableEsimWfc = prefs.getBoolean("esim_wfc", true);
             Log.i("PrivilegedProcess", "Selected SubId: " + selectedSubId + ", enableVT: " + enableVT);
 
             int[] subIds;
@@ -86,6 +87,25 @@ public class PrivilegedProcess extends Instrumentation {
 
             for (var subId : subIds) {
                 Log.i("PrivilegedProcess", "Processing SubId: " + subId);
+
+                PersistableBundle subValues = new PersistableBundle(values);
+                try {
+                    android.telephony.SubscriptionInfo info = sm.getActiveSubscriptionInfo(subId);
+                    if (info != null) {
+                        String mcc = info.getMccString();
+                        boolean isForeign = mcc != null && !mcc.startsWith("460");
+                        if (info.isEmbedded() || isForeign) {
+                            prefs.edit().putBoolean("has_esim", true).commit();
+                            if (enableEsimWfc) {
+                                Log.i("PrivilegedProcess", "SubId " + subId + " is foreign/eSIM. Forcing VoWiFi preferred.");
+                                subValues.putInt(CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2); // 2 = Wi-Fi Preferred
+                                subValues.putInt(CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w("PrivilegedProcess", "Failed to check eSIM status", e);
+                }
 
                 // 尝试通过 ImsMmTelManager 切换系统 VT 开关
                 try {
@@ -108,16 +128,16 @@ public class PrivilegedProcess extends Instrumentation {
                 Log.i("PrivilegedProcess", "Current version: " + currentVersion + ", BuildConfig: " + BuildConfig.VERSION_CODE);
 
                 if (currentVersion != BuildConfig.VERSION_CODE) {
-                    values.putInt("vvb2060_config_version", BuildConfig.VERSION_CODE);
+                    subValues.putInt("vvb2060_config_version", BuildConfig.VERSION_CODE);
                     // 使用反射调用 overrideConfig
                     try {
                         cm.getClass().getMethod("overrideConfig", int.class, PersistableBundle.class)
-                            .invoke(cm, subId, values);
+                            .invoke(cm, subId, subValues);
                         Log.i("PrivilegedProcess", "Applied config (2-param) to SubId: " + subId);
                     } catch (NoSuchMethodException e) {
                         // 如果不存在两参数方法，尝试三参数方法
                         cm.getClass().getMethod("overrideConfig", int.class, PersistableBundle.class, boolean.class)
-                            .invoke(cm, subId, values, false);
+                            .invoke(cm, subId, subValues, false);
                         Log.i("PrivilegedProcess", "Applied config (3-param) to SubId: " + subId);
                     }
                 } else {
@@ -143,7 +163,7 @@ public class PrivilegedProcess extends Instrumentation {
         boolean enableVoWiFi = prefs.getBoolean("vowifi", true);
         boolean enableVT = prefs.getBoolean("vt", false);
         boolean enableVoNR = prefs.getBoolean("vonr", false);
-        boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
+        boolean enableCrossSIM = prefs.getBoolean("cross_sim", false);
         boolean enableUT = prefs.getBoolean("ut", true);
         boolean enable5GNR = prefs.getBoolean("5g_nr", false);
 

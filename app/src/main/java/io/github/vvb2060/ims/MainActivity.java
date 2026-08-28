@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     private Switch switchCrossSIM;
     private Switch switchUT;
     private Switch switch5GNR;
+    private Switch switchEsimWfc;
     private Button btnApply;
 
     private SharedPreferences prefs;
@@ -96,6 +97,7 @@ public class MainActivity extends Activity {
         switchCrossSIM = findViewById(R.id.item_cross_sim).findViewById(R.id.feature_switch);
         switchUT = findViewById(R.id.item_ut).findViewById(R.id.feature_switch);
         switch5GNR = findViewById(R.id.item_5g_nr).findViewById(R.id.feature_switch);
+        switchEsimWfc = findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_switch);
 
         // Set feature titles and descriptions
         ((TextView) findViewById(R.id.item_volte).findViewById(R.id.feature_title))
@@ -132,6 +134,11 @@ public class MainActivity extends Activity {
             .setText(R.string._5g_nr);
         ((TextView) findViewById(R.id.item_5g_nr).findViewById(R.id.feature_desc))
             .setText(R.string._5g_nr_desc);
+
+        ((TextView) findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_title))
+            .setText(R.string.esim_wfc);
+        ((TextView) findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_desc))
+            .setText(R.string.esim_wfc_desc);
 
         btnApply = findViewById(R.id.btn_apply);
         btnApply.setOnClickListener(v -> applyConfiguration());
@@ -195,9 +202,15 @@ public class MainActivity extends Activity {
         switchVoWiFi.setChecked(prefs.getBoolean("vowifi", true));
         switchVT.setChecked(prefs.getBoolean("vt", false));
         switchVoNR.setChecked(prefs.getBoolean("vonr", false));
-        switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", true));
+        switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", false));
         switchUT.setChecked(prefs.getBoolean("ut", true));
         switch5GNR.setChecked(prefs.getBoolean("5g_nr", false));
+        switchEsimWfc.setChecked(prefs.getBoolean("esim_wfc", true));
+        
+        if (prefs.getBoolean("has_esim", false)) {
+            findViewById(R.id.item_esim_wfc).setVisibility(View.VISIBLE);
+            findViewById(R.id.divider_esim_wfc).setVisibility(View.VISIBLE);
+        }
     }
 
     private void savePreferences() {
@@ -209,6 +222,7 @@ public class MainActivity extends Activity {
         editor.putBoolean("cross_sim", switchCrossSIM.isChecked());
         editor.putBoolean("ut", switchUT.isChecked());
         editor.putBoolean("5g_nr", switch5GNR.isChecked());
+        editor.putBoolean("esim_wfc", switchEsimWfc.isChecked());
         editor.apply();
     }
 
@@ -299,6 +313,9 @@ public class MainActivity extends Activity {
                     Intent intent = new Intent(this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                     startActivity(intent);
+                    
+                    // 重新加载配置，以便更新隐藏的开关（如 eSIM WFC）
+                    loadPreferences();
 
                     // 显示成功对话框，提供跳转到网络设置的选项
                     showNetworkSettingsDialog();
