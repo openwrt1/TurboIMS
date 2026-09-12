@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Turbo IMS</string>
+    <string name="app_name">Pixel8电话适配助手</string>
     <string name="for_pixel">for Pixel</string>
 
     <!-- Main Screen -->
-    <string name="title">Turbo IMS 配置</string>
+    <string name="title">Pixel8电话适配助手</string>
     <string name="system_info">系统信息</string>
     <string name="android_version">Android 版本：%s</string>
     <string name="shizuku_status">Shizuku 状态：%s</string>
@@ -33,6 +33,10 @@
     <string name="_5g_nr_desc">启用 5G 网络（非独立/独立组网）。警告：搭载三星基带的机型（如 Pixel 8 系列）在中国使用 5G 可能会导致严重发热与耗电，建议保持关闭。</string>
     <string name="esim_wfc">eSIM Wi-Fi Calling</string>
     <string name="esim_wfc_desc">检测到 eSIM/外卡时，强制优先使用 Wi-Fi 通话</string>
+    <string name="esim_wfc_roaming">eSIM 漫游 Wi-Fi Calling</string>
+    <string name="esim_wfc_roaming_desc">检测到 eSIM/外卡时，强制开启漫游状态下的 Wi-Fi 通话</string>
+    <string name="esim_sms_calling">eSIM 短信与电话</string>
+    <string name="esim_sms_calling_desc">强制允许在 eSIM 漫游 / Wi-Fi 下使用短信和语音</string>
 
     <!-- Button -->
     <string name="apply_config">应用配置</string>
@@ -67,4 +71,19 @@
     <string name="go_to_network_settings">前往网络设置</string>
     <string name="config_success_message">配置已成功应用！（若检测到 eSIM 或外卡，已自动强制优先使用 Wi-Fi Calling）。是否前往网络设置？</string>
     <string name="later">稍后</string>
+
+    <!-- Active SIM Info -->
+    <string name="active_sim_info_title">当前活跃卡信息</string>
+    <string name="permission_required">需要授予“电话”权限才能读取当前 SIM 卡配置状态</string>
+    <string name="grant_permission">授予权限</string>
+    <string name="reading_sim_info">读取中...</string>
+    <string name="no_active_sim_details">未获取到活跃的 SIM 卡信息</string>
+    <string name="china_main_sim_tips">检测到中国大陆主卡，必须开启 VoLTE 才能正常通话！（为避免 Pixel 8 耗电，建议不要开启 5G 和跨 SIM 卡通话）</string>
+
+    <!-- Properties -->
+    <string name="prop_volte">VoLTE (4G 高清通话)</string>
+    <string name="prop_prov_req">资格审查</string>
+    <string name="prop_roaming_wfc">漫游 WiFi Calling 支持</string>
+    <string name="prop_wifi_only">纯 WiFi 支持</string>
+    <string name="prop_wfc_avail">WiFi Calling 总开关</string>
 </resources>

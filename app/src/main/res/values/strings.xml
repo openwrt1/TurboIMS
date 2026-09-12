@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Turbo IMS</string>
+    <string name="app_name">Pixel 8 Call Assistant</string>
     <string name="for_pixel">for Pixel</string>
 
     <!-- Main Screen -->
-    <string name="title">Turbo IMS Configuration</string>
+    <string name="title">Pixel 8 Call Assistant</string>
     <string name="system_info">System Information</string>
     <string name="android_version">Android Version: %s</string>
     <string name="shizuku_status">Shizuku Status: %s</string>
@@ -33,6 +33,10 @@
     <string name="_5g_nr_desc">Enable 5G network (NSA/SA). Warning: Pixels with Samsung modems (e.g. Pixel 8 series) may experience severe battery drain and heating on 5G in China; recommended to keep disabled.</string>
     <string name="esim_wfc">eSIM Wi-Fi Calling</string>
     <string name="esim_wfc_desc">Force Wi-Fi Calling preferred for eSIM/Foreign SIM</string>
+    <string name="esim_wfc_roaming">eSIM WFC Roaming</string>
+    <string name="esim_wfc_roaming_desc">Enable roaming Wi-Fi Calling for eSIM/Foreign SIM</string>
+    <string name="esim_sms_calling">eSIM SMS / Calling</string>
+    <string name="esim_sms_calling_desc">Force enable SMS and Voice over WFC for eSIM</string>
 
     <!-- Button -->
     <string name="apply_config">Apply Configuration</string>
@@ -67,4 +71,19 @@
     <string name="go_to_network_settings">Go to Network Settings</string>
     <string name="config_success_message">Configuration applied successfully! (If a foreign/eSIM is detected, Wi-Fi Calling preferred has been automatically forced). Would you like to go to network settings?</string>
     <string name="later">Later</string>
+
+    <!-- Active SIM Info -->
+    <string name="active_sim_info_title">Active SIM Info</string>
+    <string name="permission_required">Permission required to read SIM status</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="reading_sim_info">Reading...</string>
+    <string name="no_active_sim_details">No active SIM details available</string>
+    <string name="china_main_sim_tips">Mainland China SIM detected. MUST enable VoLTE to make calls. (To save battery on Pixel 8, avoid enabling 5G and Cross-SIM calling)</string>
+
+    <!-- Properties -->
+    <string name="prop_volte">VoLTE (4G Voice)</string>
+    <string name="prop_prov_req">Provisioning Required</string>
+    <string name="prop_roaming_wfc">Roaming WiFi Calling</string>
+    <string name="prop_wifi_only">WiFi Only Support</string>
+    <string name="prop_wfc_avail">WiFi Calling Available</string>
 </resources>

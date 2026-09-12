@@ -28,7 +28,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="⚡ Turbo IMS"
+                    android:text="@string/app_name"
                     android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="#FFFFFF"
@@ -222,6 +222,24 @@
             <include layout="@layout/feature_item"
                 android:id="@+id/item_esim_wfc"
                 android:visibility="gone" />
+
+            <View style="@style/Divider"
+                android:id="@+id/divider_esim_wfc_roaming"
+                android:visibility="gone" />
+
+            <!-- eSIM WFC Roaming -->
+            <include layout="@layout/feature_item"
+                android:id="@+id/item_esim_wfc_roaming"
+                android:visibility="gone" />
+
+            <View style="@style/Divider"
+                android:id="@+id/divider_esim_sms_calling"
+                android:visibility="gone" />
+
+            <!-- eSIM SMS/Calling -->
+            <include layout="@layout/feature_item"
+                android:id="@+id/item_esim_sms_calling"
+                android:visibility="gone" />
         </LinearLayout>
 
         <!-- Apply Button -->
@@ -238,6 +256,61 @@
             android:textColor="#FFFFFF"
             android:background="#1A73E8"
             android:enabled="false" />
+
+        <!-- Active SIM Info Card -->
+        <LinearLayout
+            android:id="@+id/card_active_sim_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:padding="20dp"
+            android:elevation="2dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/active_sim_info_title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1A73E8"
+                android:paddingBottom="12dp" />
+
+            <!-- Permission Required View -->
+            <LinearLayout
+                android:id="@+id/layout_sim_permission"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/permission_required"
+                    android:textSize="14sp"
+                    android:textColor="#757575"
+                    android:paddingBottom="8dp" />
+                <Button
+                    android:id="@+id/btn_grant_permission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/grant_permission"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Info View -->
+            <TextView
+                android:id="@+id/tv_active_sim_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reading_sim_info"
+                android:textSize="14sp"
+                android:textColor="#424242"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
 
         <!-- Tips -->
         <TextView

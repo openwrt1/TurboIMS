@@ -1,5 +1,11 @@
 package io.github.vvb2060.ims;
 
+import android.Manifest;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.os.PersistableBundle;
+import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -37,7 +43,13 @@ public class MainActivity extends Activity {
     private Switch switchUT;
     private Switch switch5GNR;
     private Switch switchEsimWfc;
+    private Switch switchEsimWfcRoaming;
+    private Switch switchEsimSmsCalling;
     private Button btnApply;
+    private View layoutSimPermission;
+    private Button btnGrantSimPermission;
+    private TextView tvActiveSimDetails;
+
 
     private SharedPreferences prefs;
     private int selectedSubId = -1; // 默认全部应用
@@ -70,6 +82,13 @@ public class MainActivity extends Activity {
         Shizuku.addBinderDeadListener(binderDeadListener);
     }
 
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshActiveSimInfo();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -89,6 +108,17 @@ public class MainActivity extends Activity {
         btnSelectSim = findViewById(R.id.btn_select_sim);
         btnSwitchLanguage = findViewById(R.id.btn_switch_language);
 
+        layoutSimPermission = findViewById(R.id.layout_sim_permission);
+        btnGrantSimPermission = findViewById(R.id.btn_grant_permission);
+        tvActiveSimDetails = findViewById(R.id.tv_active_sim_details);
+
+        btnGrantSimPermission.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 100);
+            }
+        });
+
+
         // Find switches from included layouts
         switchVoLTE = findViewById(R.id.item_volte).findViewById(R.id.feature_switch);
         switchVoWiFi = findViewById(R.id.item_vowifi).findViewById(R.id.feature_switch);
@@ -98,6 +128,8 @@ public class MainActivity extends Activity {
         switchUT = findViewById(R.id.item_ut).findViewById(R.id.feature_switch);
         switch5GNR = findViewById(R.id.item_5g_nr).findViewById(R.id.feature_switch);
         switchEsimWfc = findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_switch);
+        switchEsimWfcRoaming = findViewById(R.id.item_esim_wfc_roaming).findViewById(R.id.feature_switch);
+        switchEsimSmsCalling = findViewById(R.id.item_esim_sms_calling).findViewById(R.id.feature_switch);
 
         // Set feature titles and descriptions
         ((TextView) findViewById(R.id.item_volte).findViewById(R.id.feature_title))
@@ -139,6 +171,16 @@ public class MainActivity extends Activity {
             .setText(R.string.esim_wfc);
         ((TextView) findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_desc))
             .setText(R.string.esim_wfc_desc);
+
+        ((TextView) findViewById(R.id.item_esim_wfc_roaming).findViewById(R.id.feature_title))
+            .setText(R.string.esim_wfc_roaming);
+        ((TextView) findViewById(R.id.item_esim_wfc_roaming).findViewById(R.id.feature_desc))
+            .setText(R.string.esim_wfc_roaming_desc);
+
+        ((TextView) findViewById(R.id.item_esim_sms_calling).findViewById(R.id.feature_title))
+            .setText(R.string.esim_sms_calling);
+        ((TextView) findViewById(R.id.item_esim_sms_calling).findViewById(R.id.feature_desc))
+            .setText(R.string.esim_sms_calling_desc);
 
         btnApply = findViewById(R.id.btn_apply);
         btnApply.setOnClickListener(v -> applyConfiguration());
@@ -206,10 +248,16 @@ public class MainActivity extends Activity {
         switchUT.setChecked(prefs.getBoolean("ut", true));
         switch5GNR.setChecked(prefs.getBoolean("5g_nr", false));
         switchEsimWfc.setChecked(prefs.getBoolean("esim_wfc", true));
+        switchEsimWfcRoaming.setChecked(prefs.getBoolean("esim_wfc_roaming", true));
+        switchEsimSmsCalling.setChecked(prefs.getBoolean("esim_sms_calling", true));
         
         if (prefs.getBoolean("has_esim", false)) {
             findViewById(R.id.item_esim_wfc).setVisibility(View.VISIBLE);
             findViewById(R.id.divider_esim_wfc).setVisibility(View.VISIBLE);
+            findViewById(R.id.item_esim_wfc_roaming).setVisibility(View.VISIBLE);
+            findViewById(R.id.divider_esim_wfc_roaming).setVisibility(View.VISIBLE);
+            findViewById(R.id.item_esim_sms_calling).setVisibility(View.VISIBLE);
+            findViewById(R.id.divider_esim_sms_calling).setVisibility(View.VISIBLE);
         }
     }
 
@@ -223,6 +271,8 @@ public class MainActivity extends Activity {
         editor.putBoolean("ut", switchUT.isChecked());
         editor.putBoolean("5g_nr", switch5GNR.isChecked());
         editor.putBoolean("esim_wfc", switchEsimWfc.isChecked());
+        editor.putBoolean("esim_wfc_roaming", switchEsimWfcRoaming.isChecked());
+        editor.putBoolean("esim_sms_calling", switchEsimSmsCalling.isChecked());
         editor.apply();
     }
 
@@ -341,6 +391,87 @@ public class MainActivity extends Activity {
             })
             .setNegativeButton(R.string.later, null)
             .show();
+    }
+
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            refreshActiveSimInfo();
+        }
+    }
+
+    private void refreshActiveSimInfo() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            tvActiveSimDetails.setVisibility(View.GONE);
+            layoutSimPermission.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        layoutSimPermission.setVisibility(View.GONE);
+        tvActiveSimDetails.setVisibility(View.VISIBLE);
+
+        SubscriptionManager sm = getSystemService(SubscriptionManager.class);
+        CarrierConfigManager cm = getSystemService(CarrierConfigManager.class);
+        if (sm == null || cm == null) {
+            tvActiveSimDetails.setText(R.string.no_active_sim_details);
+            return;
+        }
+
+        List<SubscriptionInfo> activeList = null;
+        try {
+            activeList = sm.getActiveSubscriptionInfoList();
+        } catch (SecurityException e) {
+            Log.e(TAG, "No permission to get active subscriptions", e);
+        }
+
+        if (activeList == null || activeList.isEmpty()) {
+            tvActiveSimDetails.setText(R.string.no_active_sim_details);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (SubscriptionInfo info : activeList) {
+            int subId = info.getSubscriptionId();
+            String mcc = info.getMccString();
+            boolean isChina = mcc != null && mcc.startsWith("460");
+            boolean isEsim = info.isEmbedded();
+            boolean isForeign = mcc != null && !mcc.startsWith("460");
+            
+            sb.append("SIM ").append(info.getSimSlotIndex() + 1).append(" (SubId: ").append(subId).append("\n");
+            CharSequence carrierName = info.getCarrierName();
+            sb.append("Carrier: ").append(carrierName != null ? carrierName.toString() : "Unknown").append("\n");
+            
+            PersistableBundle config = cm.getConfigForSubId(subId);
+            
+            if (isChina) {
+                sb.append(getString(R.string.china_main_sim_tips)).append("\n");
+                if (config != null) {
+                    boolean volte = config.getBoolean("carrier_volte_available_bool", false);
+                    sb.append(" - ").append(getString(R.string.prop_volte)).append(": ").append(volte ? "✅" : "❎").append("\n");
+                }
+            }
+            
+            if (isEsim || isForeign) {
+                if (config != null) {
+                    boolean provReq = config.getBoolean("carrier_wfc_provisioning_required_bool", false);
+                    boolean roamingWfc = config.getBoolean("carrier_default_wfc_ims_roaming_enabled_bool", false);
+                    boolean wifiOnly = config.getBoolean("carrier_wfc_supports_wifi_only_bool", false);
+                    boolean wfcAvail = config.getBoolean("carrier_wfc_ims_available_bool", false);
+                    
+                    sb.append(" - ").append(getString(R.string.prop_prov_req)).append(": ").append(provReq ? "✅" : "❎").append("\n");
+                    sb.append(" - ").append(getString(R.string.prop_roaming_wfc)).append(": ").append(roamingWfc ? "✅" : "❎").append("\n");
+                    sb.append(" - ").append(getString(R.string.prop_wifi_only)).append(": ").append(wifiOnly ? "✅" : "❎").append("\n");
+                    sb.append(" - ").append(getString(R.string.prop_wfc_avail)).append(": ").append(wfcAvail ? "✅" : "❎").append("\n");
+                } else {
+                    sb.append(" Cannot read carrier config.\n");
+                }
+            }
+            sb.append("\n");
+        }
+        
+        tvActiveSimDetails.setText(sb.toString().trim());
     }
 
     @Override

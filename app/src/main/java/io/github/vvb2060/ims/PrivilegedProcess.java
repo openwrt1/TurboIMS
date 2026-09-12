@@ -72,12 +72,38 @@ public class PrivilegedProcess extends Instrumentation {
             int selectedSubId = prefs.getInt("selected_subid", -1);
             boolean enableVT = prefs.getBoolean("vt", false);
             boolean enableEsimWfc = prefs.getBoolean("esim_wfc", true);
+            boolean enableEsimWfcRoaming = prefs.getBoolean("esim_wfc_roaming", true);
+            boolean enableEsimSmsCalling = prefs.getBoolean("esim_sms_calling", true);
             Log.i("PrivilegedProcess", "Selected SubId: " + selectedSubId + ", enableVT: " + enableVT);
 
             int[] subIds;
             if (selectedSubId == -1) {
                 // 应用到所有 SIM 卡
-                subIds = (int[]) sm.getClass().getMethod("getActiveSubscriptionIdList").invoke(sm);
+                java.util.List<android.telephony.SubscriptionInfo> infoList = null;
+                try {
+                    infoList = sm.getActiveSubscriptionInfoList();
+                    // 尝试获取所有可用的 SIM 卡 (包括未启用的 eSIM)
+                    try {
+                        java.util.List<android.telephony.SubscriptionInfo> availableList = 
+                            (java.util.List<android.telephony.SubscriptionInfo>) sm.getClass().getMethod("getAvailableSubscriptionInfoList").invoke(sm);
+                        if (availableList != null && !availableList.isEmpty()) {
+                            infoList = availableList;
+                        }
+                    } catch (Exception e) {
+                        Log.w("PrivilegedProcess", "Failed to get available subscriptions, fallback to active only", e);
+                    }
+                } catch (Exception e) {
+                    Log.e("PrivilegedProcess", "Failed to get subscription info list", e);
+                }
+
+                if (infoList != null) {
+                    subIds = new int[infoList.size()];
+                    for (int i = 0; i < infoList.size(); i++) {
+                        subIds[i] = infoList.get(i).getSubscriptionId();
+                    }
+                } else {
+                    subIds = (int[]) sm.getClass().getMethod("getActiveSubscriptionIdList").invoke(sm);
+                }
                 Log.i("PrivilegedProcess", "Applying to all SIM cards: " + java.util.Arrays.toString(subIds));
             } else {
                 // 只应用到选中的 SIM 卡
@@ -100,6 +126,16 @@ public class PrivilegedProcess extends Instrumentation {
                                 Log.i("PrivilegedProcess", "SubId " + subId + " is foreign/eSIM. Forcing VoWiFi preferred.");
                                 subValues.putInt(CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT, 2); // 2 = Wi-Fi Preferred
                                 subValues.putInt(CarrierConfigManager.KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT, 2);
+                            }
+                            if (enableEsimWfcRoaming) {
+                                Log.i("PrivilegedProcess", "SubId " + subId + " is foreign/eSIM. Forcing roaming VoWiFi enabled.");
+                                subValues.putBoolean("carrier_default_wfc_ims_roaming_enabled_bool", true);
+                            }
+                            if (enableEsimSmsCalling) {
+                                Log.i("PrivilegedProcess", "SubId " + subId + " is foreign/eSIM. Forcing SMS/Calling over WFC.");
+                                subValues.putBoolean("carrier_wfc_supports_wifi_calling_bool", true);
+                                subValues.putBoolean("carrier_default_wfc_ims_enabled_bool", true);
+                                subValues.putBoolean("carrier_ims_voice_available_bool", true);
                             }
                         }
                     }
@@ -127,9 +163,9 @@ public class PrivilegedProcess extends Instrumentation {
                 int currentVersion = bundle.getInt("vvb2060_config_version", 0);
                 Log.i("PrivilegedProcess", "Current version: " + currentVersion + ", BuildConfig: " + BuildConfig.VERSION_CODE);
 
-                if (currentVersion != BuildConfig.VERSION_CODE) {
-                    subValues.putInt("vvb2060_config_version", BuildConfig.VERSION_CODE);
-                    // 使用反射调用 overrideConfig
+                subValues.putInt("vvb2060_config_version", BuildConfig.VERSION_CODE);
+                // 使用反射调用 overrideConfig
+                try {
                     try {
                         cm.getClass().getMethod("overrideConfig", int.class, PersistableBundle.class)
                             .invoke(cm, subId, subValues);
@@ -140,8 +176,8 @@ public class PrivilegedProcess extends Instrumentation {
                             .invoke(cm, subId, subValues, false);
                         Log.i("PrivilegedProcess", "Applied config (3-param) to SubId: " + subId);
                     }
-                } else {
-                    Log.i("PrivilegedProcess", "Config already up-to-date for SubId: " + subId);
+                } catch (Exception e) {
+                    Log.e("PrivilegedProcess", "Failed to apply config for SubId: " + subId, e);
                 }
             }
         } finally {
