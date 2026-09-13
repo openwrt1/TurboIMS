@@ -37,6 +37,8 @@
     <string name="esim_wfc_roaming_desc">检测到 eSIM/外卡时，强制开启漫游状态下的 Wi-Fi 通话</string>
     <string name="esim_sms_calling">eSIM 短信与电话</string>
     <string name="esim_sms_calling_desc">强制允许在 eSIM 漫游 / Wi-Fi 下使用短信和语音</string>
+    <string name="location_reporting">阉割 SIP 位置上报</string>
+    <string name="location_reporting_desc">禁止在 SIP 中携带 PIDF-LO 国家信息，用于绕过基于位置的漫游拦截</string>
 
     <!-- Button -->
     <string name="apply_config">应用配置</string>

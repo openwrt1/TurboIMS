@@ -171,10 +171,10 @@ public class PrivilegedProcess extends Instrumentation {
                             .invoke(cm, subId, subValues);
                         Log.i("PrivilegedProcess", "Applied config (2-param) to SubId: " + subId);
                     } catch (NoSuchMethodException e) {
-                        // 如果不存在两参数方法，尝试三参数方法
+                        // 如果不存在两参数方法，尝试三参数方法 (将 false 改为 true 以实现持久化!)
                         cm.getClass().getMethod("overrideConfig", int.class, PersistableBundle.class, boolean.class)
-                            .invoke(cm, subId, subValues, false);
-                        Log.i("PrivilegedProcess", "Applied config (3-param) to SubId: " + subId);
+                            .invoke(cm, subId, subValues, true);
+                        Log.i("PrivilegedProcess", "Applied config (3-param persistent) to SubId: " + subId);
                     }
                 } catch (Exception e) {
                     Log.e("PrivilegedProcess", "Failed to apply config for SubId: " + subId, e);
@@ -202,6 +202,8 @@ public class PrivilegedProcess extends Instrumentation {
         boolean enableCrossSIM = prefs.getBoolean("cross_sim", false);
         boolean enableUT = prefs.getBoolean("ut", true);
         boolean enable5GNR = prefs.getBoolean("5g_nr", false);
+        boolean disableLocationReporting = prefs.getBoolean("location_reporting", true);
+        boolean enableEsimSmsCalling = prefs.getBoolean("esim_sms_calling", true);
 
         var bundle = new PersistableBundle();
 
@@ -260,6 +262,19 @@ public class PrivilegedProcess extends Instrumentation {
                             -108, /* SIGNAL_STRENGTH_GOOD */
                             -98,  /* SIGNAL_STRENGTH_GREAT */
                     });
+        }
+
+        // Location Reporting (PIDF-LO & PANI) 配置
+        if (disableLocationReporting) {
+            bundle.putIntArray("ims.geolocation_pidf_in_sip_register_support_int_array", new int[]{});
+            bundle.putIntArray("ims.geolocation_pidf_in_sip_invite_support_int_array", new int[]{});
+            bundle.putBoolean("ims.include_local_cell_info_in_pani_bool", false);
+            bundle.putBoolean("include_local_cell_info_in_pani_bool", false);
+        }
+
+        // eSIM SMS / Calling 配置
+        if (enableEsimSmsCalling) {
+            bundle.putIntArray("imssms.sms_over_ims_supported_rats_int_array", new int[]{3, 4, 5, 6});
         }
 
         return bundle;

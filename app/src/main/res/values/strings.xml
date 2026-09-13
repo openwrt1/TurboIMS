@@ -37,6 +37,8 @@
     <string name="esim_wfc_roaming_desc">Enable roaming Wi-Fi Calling for eSIM/Foreign SIM</string>
     <string name="esim_sms_calling">eSIM SMS / Calling</string>
     <string name="esim_sms_calling_desc">Force enable SMS and Voice over WFC for eSIM</string>
+    <string name="location_reporting">Disable SIP Location</string>
+    <string name="location_reporting_desc">Disable PIDF-LO to prevent carrier from blocking WFC based on IP/Location</string>
 
     <!-- Button -->
     <string name="apply_config">Apply Configuration</string>

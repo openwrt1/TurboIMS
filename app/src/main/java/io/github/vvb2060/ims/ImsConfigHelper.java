@@ -42,6 +42,8 @@ public class ImsConfigHelper {
             boolean enableCrossSIM = prefs.getBoolean("cross_sim", true);
             boolean enableUT = prefs.getBoolean("ut", true);
             boolean enable5GNR = prefs.getBoolean("5g_nr", false);
+            boolean disableLocationReporting = prefs.getBoolean("location_reporting", true);
+            boolean enableEsimSmsCalling = prefs.getBoolean("esim_sms_calling", true);
 
             var cm = context.getSystemService(CarrierConfigManager.class);
 
@@ -62,7 +64,8 @@ public class ImsConfigHelper {
             }
 
             var values = buildConfigBundle(enableVoLTE, enableVoWiFi, enableVT, enableVoNR,
-                                           enableCrossSIM, enableUT, enable5GNR);
+                                           enableCrossSIM, enableUT, enable5GNR, disableLocationReporting,
+                                           enableEsimSmsCalling);
 
             var bundle = cm.getConfigForSubId(subId, "vvb2060_config_version");
             if (bundle.getInt("vvb2060_config_version", 0) != BuildConfig.VERSION_CODE) {
@@ -105,7 +108,8 @@ public class ImsConfigHelper {
     private static PersistableBundle buildConfigBundle(boolean enableVoLTE, boolean enableVoWiFi,
                                                         boolean enableVT, boolean enableVoNR,
                                                         boolean enableCrossSIM, boolean enableUT,
-                                                        boolean enable5GNR) {
+                                                        boolean enable5GNR, boolean disableLocationReporting,
+                                                        boolean enableEsimSmsCalling) {
         var bundle = new PersistableBundle();
 
         // VoLTE 配置
@@ -163,6 +167,19 @@ public class ImsConfigHelper {
                             -108, /* SIGNAL_STRENGTH_GOOD */
                             -98,  /* SIGNAL_STRENGTH_GREAT */
                     });
+        }
+
+        // Location Reporting (PIDF-LO & PANI) 配置
+        if (disableLocationReporting) {
+            bundle.putIntArray("ims.geolocation_pidf_in_sip_register_support_int_array", new int[]{});
+            bundle.putIntArray("ims.geolocation_pidf_in_sip_invite_support_int_array", new int[]{});
+            bundle.putBoolean("ims.include_local_cell_info_in_pani_bool", false);
+            bundle.putBoolean("include_local_cell_info_in_pani_bool", false);
+        }
+
+        // eSIM SMS / Calling 配置
+        if (enableEsimSmsCalling) {
+            bundle.putIntArray("imssms.sms_over_ims_supported_rats_int_array", new int[]{3, 4, 5, 6});
         }
 
         return bundle;

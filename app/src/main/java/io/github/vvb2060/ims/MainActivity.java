@@ -42,6 +42,7 @@ public class MainActivity extends Activity {
     private Switch switchCrossSIM;
     private Switch switchUT;
     private Switch switch5GNR;
+    private Switch switchLocationReporting;
     private Switch switchEsimWfc;
     private Switch switchEsimWfcRoaming;
     private Switch switchEsimSmsCalling;
@@ -127,6 +128,7 @@ public class MainActivity extends Activity {
         switchCrossSIM = findViewById(R.id.item_cross_sim).findViewById(R.id.feature_switch);
         switchUT = findViewById(R.id.item_ut).findViewById(R.id.feature_switch);
         switch5GNR = findViewById(R.id.item_5g_nr).findViewById(R.id.feature_switch);
+        switchLocationReporting = findViewById(R.id.item_location_reporting).findViewById(R.id.feature_switch);
         switchEsimWfc = findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_switch);
         switchEsimWfcRoaming = findViewById(R.id.item_esim_wfc_roaming).findViewById(R.id.feature_switch);
         switchEsimSmsCalling = findViewById(R.id.item_esim_sms_calling).findViewById(R.id.feature_switch);
@@ -166,6 +168,11 @@ public class MainActivity extends Activity {
             .setText(R.string._5g_nr);
         ((TextView) findViewById(R.id.item_5g_nr).findViewById(R.id.feature_desc))
             .setText(R.string._5g_nr_desc);
+
+        ((TextView) findViewById(R.id.item_location_reporting).findViewById(R.id.feature_title))
+            .setText(R.string.location_reporting);
+        ((TextView) findViewById(R.id.item_location_reporting).findViewById(R.id.feature_desc))
+            .setText(R.string.location_reporting_desc);
 
         ((TextView) findViewById(R.id.item_esim_wfc).findViewById(R.id.feature_title))
             .setText(R.string.esim_wfc);
@@ -247,6 +254,7 @@ public class MainActivity extends Activity {
         switchCrossSIM.setChecked(prefs.getBoolean("cross_sim", false));
         switchUT.setChecked(prefs.getBoolean("ut", true));
         switch5GNR.setChecked(prefs.getBoolean("5g_nr", false));
+        switchLocationReporting.setChecked(prefs.getBoolean("location_reporting", true));
         switchEsimWfc.setChecked(prefs.getBoolean("esim_wfc", true));
         switchEsimWfcRoaming.setChecked(prefs.getBoolean("esim_wfc_roaming", true));
         switchEsimSmsCalling.setChecked(prefs.getBoolean("esim_sms_calling", true));
@@ -270,6 +278,7 @@ public class MainActivity extends Activity {
         editor.putBoolean("cross_sim", switchCrossSIM.isChecked());
         editor.putBoolean("ut", switchUT.isChecked());
         editor.putBoolean("5g_nr", switch5GNR.isChecked());
+        editor.putBoolean("location_reporting", switchLocationReporting.isChecked());
         editor.putBoolean("esim_wfc", switchEsimWfc.isChecked());
         editor.putBoolean("esim_wfc_roaming", switchEsimWfcRoaming.isChecked());
         editor.putBoolean("esim_sms_calling", switchEsimSmsCalling.isChecked());
